@@ -25,7 +25,16 @@ class Value:
             self.grad += other.data * out.grad 
             other.grad += self.data * out.grad 
         out. _backward = _backward 
-        return out         
+        return out  
+
+    def __pow__(self, other): 
+        assert isinstance(other, (int, float)) # only support int/float powers for now 
+        out = Value(self.data ** other, (self,), f'**{other}')
+
+        def _backward():
+            self.grad += (other * self.data **(other - 1)) * out.grad 
+        out._backward = _backward 
+        return out 
 
 # --- Test --- 
 a = Value(2.0) 
@@ -45,3 +54,12 @@ c.grad = 1.0
 c._backward()
 print(a.grad)  # expect 3.0
 print(b.grad)  # expect 2.0
+
+# Pow 
+a = Value(2.0)
+b = a ** 3
+print(b)          # expect 8.0
+
+b.grad = 1.0
+b._backward()
+print(a.grad)     # expect 3 * 2^2 * 1.0 = 12.0
