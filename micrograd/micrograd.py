@@ -1,0 +1,47 @@
+class Value:
+    def __init__(self, data, _children=(), _op=''):
+        self.data = data 
+        self.grad = 0.0 
+        self._backward = lambda:None 
+        self._prev = set(_children) 
+        self._op = _op 
+
+    def __repr__(self): 
+        return f"Value(data={self.data}, grad={self.grad})" 
+
+    def __add__(self, other): 
+        out = Value(self.data + other.data, (self, other), '+')        
+
+        def _backward(): 
+            self.grad += out.grad 
+            other.grad += out.grad 
+        out. _backward = _backward 
+        return out     
+
+    def __mul__(self, other): 
+        out = Value(self.data * other.data, (self, other), '*')
+
+        def _backward():
+            self.grad += other.data * out.grad 
+            other.grad += self.data * out.grad 
+        out. _backward = _backward 
+        return out         
+
+# --- Test --- 
+a = Value(2.0) 
+b = Value(3.0) 
+c = a + b 
+
+c.grad = 1.0 
+c._backward() 
+print(a.grad) # expect 1.0
+print(b.grad)  # expect 1.0
+
+# test multiplication — fresh values
+a = Value(2.0)
+b = Value(3.0)
+c = a * b
+c.grad = 1.0
+c._backward()
+print(a.grad)  # expect 3.0
+print(b.grad)  # expect 2.0
