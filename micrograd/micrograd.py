@@ -47,10 +47,22 @@ class Value:
         out._backward = _backward 
         return out     
 
+    def backward(self): 
+        topo = [] 
+        visited = set() 
 
+        def build_topo(v): 
+            if v not in visited: 
+                visited.add(v) 
+                for child in v._prev: 
+                    build_topo(child)
+                topo.append(v) 
 
+        build_topo(self) 
 
-
+        self.grad = 1.0 # dL/dL = 1, the starting gradient
+        for node in reversed(topo): # walk backwards through the graph
+            node._backward()  # each node sends gradients to its parents
 
 
 
@@ -84,18 +96,30 @@ class Value:
 #b._backward()
 #print(a.grad)     # expect 3 * 2^2 * 1.0 = 12.0
 
-a = Value(0.0)
-b = a.tanh()
-print(b)        # expect tanh(0) = 0.0
+# a = Value(0.0)
+# b = a.tanh()
+# print(b)        # expect tanh(0) = 0.0
 
-b.grad = 1.0
-b._backward()
-print(a.grad)   # expect 1 - 0² = 1.0
+# b.grad = 1.0
+# b._backward()
+# print(a.grad)   # expect 1 - 0² = 1.0
 
-a = Value(1.0)
-b = a.tanh()
-print(b)        # expect tanh(1) ≈ 0.7616
+# a = Value(1.0)
+# b = a.tanh()
+# print(b)        # expect tanh(1) ≈ 0.7616
 
-b.grad = 1.0
-b._backward()
-print(a.grad)   # expect 1 - 0.7616² ≈ 0.42
+# b.grad = 1.0
+# b._backward()
+# print(a.grad)   # expect 1 - 0.7616² ≈ 0.42
+
+a = Value(0.5)
+b = Value(0.3)
+c = a * b       # c = 6.0
+d = c + Value(1.0)  # d = 7.0
+e = d.tanh()    # e = tanh(7.0) ≈ 1.0
+e.backward() 
+print('a.grad:', a.grad)
+print('b.grad:', b.grad)
+print('c.grad:', c.grad)
+print('d.grad:', d.grad)
+print('e.grad:', e.grad)
