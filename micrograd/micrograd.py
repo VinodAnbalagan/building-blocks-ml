@@ -36,30 +36,66 @@ class Value:
         out._backward = _backward 
         return out 
 
-# --- Test --- 
-a = Value(2.0) 
-b = Value(3.0) 
-c = a + b 
+    def tanh(self): 
+        import math 
+        x = self.data 
+        t = (math.exp(2*x)-1)/(math.exp(2*x)+1) 
+        out = Value(t,(self,),'tanh') 
 
-c.grad = 1.0 
-c._backward() 
-print(a.grad) # expect 1.0
-print(b.grad)  # expect 1.0
+        def _backward(): 
+            self.grad += (1 - t**2) * out.grad 
+        out._backward = _backward 
+        return out     
+
+
+
+
+
+
+
+
+
+
+# --- Test --- 
+# a = Value(2.0) 
+# b = Value(3.0) 
+# c = a + b 
+
+# c.grad = 1.0 
+# c._backward() 
+# print(a.grad) # expect 1.0
+# print(b.grad)  # expect 1.0
 
 # test multiplication — fresh values
-a = Value(2.0)
-b = Value(3.0)
-c = a * b
-c.grad = 1.0
-c._backward()
-print(a.grad)  # expect 3.0
-print(b.grad)  # expect 2.0
+# a = Value(2.0)
+# b = Value(3.0)
+# c = a * b
+# c.grad = 1.0
+# c._backward()
+# print(a.grad)  # expect 3.0
+# print(b.grad)  # expect 2.0
 
 # Pow 
-a = Value(2.0)
-b = a ** 3
-print(b)          # expect 8.0
+#a = Value(2.0)
+#b = a ** 3
+#print(b)          # expect 8.0
+
+#b.grad = 1.0
+#b._backward()
+#print(a.grad)     # expect 3 * 2^2 * 1.0 = 12.0
+
+a = Value(0.0)
+b = a.tanh()
+print(b)        # expect tanh(0) = 0.0
 
 b.grad = 1.0
 b._backward()
-print(a.grad)     # expect 3 * 2^2 * 1.0 = 12.0
+print(a.grad)   # expect 1 - 0² = 1.0
+
+a = Value(1.0)
+b = a.tanh()
+print(b)        # expect tanh(1) ≈ 0.7616
+
+b.grad = 1.0
+b._backward()
+print(a.grad)   # expect 1 - 0.7616² ≈ 0.42
