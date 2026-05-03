@@ -203,7 +203,7 @@ xs = [
 ]
 ys = [Value(1.0), Value(-1.0), Value(-1.0), Value(1.0)]  # targets
 
-for step in range(20): 
+for step in range(100): 
     
     # 1. forward pass 
     ypred = [model(x) for x in xs] 
@@ -222,3 +222,8 @@ for step in range(20):
 
 
     print(f'step {step}, loss {loss.data:.4f}')
+    
+print('\nPredictions vs targets:')
+for x, y in zip(xs, ys):
+    pred = model(x)
+    print(f'target: {y.data:.1f}, predicted: {pred.data:.4f}')    
