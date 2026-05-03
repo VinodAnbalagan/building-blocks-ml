@@ -16,7 +16,10 @@ class Value:
             self.grad += out.grad 
             other.grad += out.grad 
         out. _backward = _backward 
-        return out     
+        return out 
+
+    def __radd__(self, other): 
+        return self + other         
 
     def __mul__(self, other): 
         out = Value(self.data * other.data, (self, other), '*')
@@ -65,6 +68,19 @@ class Value:
             node._backward()  # each node sends gradients to its parents
 
 
+import random 
+
+class Neuron: 
+    def __init__(self, nin): 
+        self.w = [Value(random.uniform(-1,1)) for _ in range (nin)] 
+        self.b = Value(random.uniform(-1,1)) 
+
+    def __call__(self, x): 
+        act = sum((wi * xi for wi, xi in zip(self.w, x)), self.b) 
+        return act.tanh() 
+
+    def parameters(self):
+        return self.w + [self.b] 
 
 
 
@@ -112,14 +128,22 @@ class Value:
 # b._backward()
 # print(a.grad)   # expect 1 - 0.7616² ≈ 0.42
 
-a = Value(0.5)
-b = Value(0.3)
-c = a * b       # c = 6.0
-d = c + Value(1.0)  # d = 7.0
-e = d.tanh()    # e = tanh(7.0) ≈ 1.0
-e.backward() 
-print('a.grad:', a.grad)
-print('b.grad:', b.grad)
-print('c.grad:', c.grad)
-print('d.grad:', d.grad)
-print('e.grad:', e.grad)
+# a = Value(0.5)
+# b = Value(0.3)
+# c = a * b       # c = 6.0
+# d = c + Value(1.0)  # d = 7.0
+# e = d.tanh()    # e = tanh(7.0) ≈ 1.0
+# e.backward() 
+# print('a.grad:', a.grad)
+# print('b.grad:', b.grad)
+# print('c.grad:', c.grad)
+# print('d.grad:', d.grad)
+# print('e.grad:', e.grad)
+
+n = Neuron(3)
+x = [Value(1.0), Value(0.5), Value(-1.0)]
+out = n(x)
+print(out)
+out.backward()
+for i, p in enumerate(n.parameters()):
+    print(f'param {i}: data={p.data:.4f}, grad={p.grad:.4f}')
