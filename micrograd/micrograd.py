@@ -9,7 +9,8 @@ class Value:
     def __repr__(self): 
         return f"Value(data={self.data}, grad={self.grad})" 
 
-    def __add__(self, other): 
+    def __add__(self, other):
+        other = other if isinstance(other, Value) else Value(other) 
         out = Value(self.data + other.data, (self, other), '+')        
 
         def _backward(): 
@@ -22,6 +23,7 @@ class Value:
         return self + other         
 
     def __mul__(self, other): 
+        other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data * other.data, (self, other), '*')
 
         def _backward():
@@ -38,6 +40,14 @@ class Value:
             self.grad += (other * self.data **(other - 1)) * out.grad 
         out._backward = _backward 
         return out 
+
+    def __neg__(self): 
+        return self * Value(-1.0)
+    
+    def __sub__(self, other): 
+        return self + (-other) 
+
+
 
     def tanh(self): 
         import math 
@@ -165,17 +175,50 @@ class MLP:
 # print('d.grad:', d.grad)
 # print('e.grad:', e.grad)
 
-n = Neuron(3)
-x = [Value(1.0), Value(0.5), Value(-1.0)]
-out = n(x)
-print(out)
-out.backward()
-for i, p in enumerate(n.parameters()):
-    print(f'param {i}: data={p.data:.4f}, grad={p.grad:.4f}')
+# n = Neuron(3)
+# x = [Value(1.0), Value(0.5), Value(-1.0)]
+# out = n(x)
+# print(out)
+# out.backward()
+# for i, p in enumerate(n.parameters()):
+#     print(f'param {i}: data={p.data:.4f}, grad={p.grad:.4f}')
+
+# model = MLP(2, [3, 4, 1])
+# x = [Value(1.0), Value(0.5)]
+# out = model(x)
+# print(out)
+# out.backward()
+# print(f'Total parameters: {len(model.parameters())}')    
+
+
+random.seed(42)
 
 model = MLP(2, [3, 4, 1])
-x = [Value(1.0), Value(0.5)]
-out = model(x)
-print(out)
-out.backward()
-print(f'Total parameters: {len(model.parameters())}')    
+# dataset
+xs = [
+    [Value(2.0),  Value(3.0)],
+    [Value(-1.0), Value(1.0)],
+    [Value(0.5),  Value(1.0)],
+    [Value(1.0),  Value(-1.0)],
+]
+ys = [Value(1.0), Value(-1.0), Value(-1.0), Value(1.0)]  # targets
+
+for step in range(20): 
+    
+    # 1. forward pass 
+    ypred = [model(x) for x in xs] 
+    loss = sum((yout - ygt)**2 for yout, ygt in zip(ypred, ys)) 
+
+    #2. zero gradients 
+    for p in model.parameters():  
+        p.grad = 0 
+
+    # 3. backward pass 
+    loss.backward() 
+
+    # 4. update weights 
+    for p in model.parameters(): 
+        p.data -= 0.01 * p.grad 
+
+
+    print(f'step {step}, loss {loss.data:.4f}')
