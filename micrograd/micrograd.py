@@ -78,44 +78,7 @@ class Value:
             node._backward()  # each node sends gradients to its parents
 
 
-import random 
 
-class Neuron: 
-    def __init__(self, nin): 
-        self.w = [Value(random.uniform(-1,1)) for _ in range (nin)] 
-        self.b = Value(random.uniform(-1,1)) 
-
-    def __call__(self, x): 
-        act = sum((wi * xi for wi, xi in zip(self.w, x)), self.b) 
-        return act.tanh() 
-
-    def parameters(self):
-        return self.w + [self.b] 
-
-class Layer:
-    def __init__(self, nin, nout):
-        self.neurons = [Neuron(nin) for _ in range(nout)]
-
-    def __call__(self, x):
-        outs = [n(x) for n in self.neurons]
-        return outs[0] if len(outs) == 1 else outs
-
-    def parameters(self):
-        return [p for n in self.neurons for p in n.parameters()]
-
-
-class MLP:
-    def __init__(self, nin, nouts):
-        sizes = [nin] + nouts
-        self.layers = [Layer(sizes[i], sizes[i+1]) for i in range(len(nouts))]
-
-    def __call__(self, x):
-        for layer in self.layers:
-            x = layer(x)
-        return x
-
-    def parameters(self):
-        return [p for layer in self.layers for p in layer.parameters()]                                 
 
 
 
@@ -175,55 +138,7 @@ class MLP:
 # print('d.grad:', d.grad)
 # print('e.grad:', e.grad)
 
-# n = Neuron(3)
-# x = [Value(1.0), Value(0.5), Value(-1.0)]
-# out = n(x)
-# print(out)
-# out.backward()
-# for i, p in enumerate(n.parameters()):
-#     print(f'param {i}: data={p.data:.4f}, grad={p.grad:.4f}')
-
-# model = MLP(2, [3, 4, 1])
-# x = [Value(1.0), Value(0.5)]
-# out = model(x)
-# print(out)
-# out.backward()
-# print(f'Total parameters: {len(model.parameters())}')    
+ 
 
 
-random.seed(42)
-
-model = MLP(2, [3, 4, 1])
-# dataset
-xs = [
-    [Value(2.0),  Value(3.0)],
-    [Value(-1.0), Value(1.0)],
-    [Value(0.5),  Value(1.0)],
-    [Value(1.0),  Value(-1.0)],
-]
-ys = [Value(1.0), Value(-1.0), Value(-1.0), Value(1.0)]  # targets
-
-for step in range(100): 
-    
-    # 1. forward pass 
-    ypred = [model(x) for x in xs] 
-    loss = sum((yout - ygt)**2 for yout, ygt in zip(ypred, ys)) 
-
-    #2. zero gradients 
-    for p in model.parameters():  
-        p.grad = 0 
-
-    # 3. backward pass 
-    loss.backward() 
-
-    # 4. update weights 
-    for p in model.parameters(): 
-        p.data -= 0.01 * p.grad 
-
-
-    print(f'step {step}, loss {loss.data:.4f}')
-    
-print('\nPredictions vs targets:')
-for x, y in zip(xs, ys):
-    pred = model(x)
-    print(f'target: {y.data:.1f}, predicted: {pred.data:.4f}')    
+  
