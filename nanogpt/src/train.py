@@ -8,6 +8,7 @@ block_size = 8
 learning_rate = 1e-3
 max_steps = 10000
 eval_interval = 1000
+n_embd = 32
 
 torch.manual_seed(1337)
 
@@ -18,7 +19,7 @@ data = torch.tensor(encode(text, stoi), dtype=torch.long)
 train_data, val_data = get_splits(data)
 
 # model
-model = BigramLanguageModel(vocab_size)
+model = BigramLanguageModel(vocab_size, n_embd, block_size)
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 # training loop
