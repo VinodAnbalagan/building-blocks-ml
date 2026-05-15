@@ -27,6 +27,20 @@ class Head(nn.Module):
         out = wei @ v      # (B, T, head_size)
         return out
 
+class FeedForward(nn.Module): 
+
+    def __init__(self, n_embd): 
+        super().__init__() 
+        self.net = nn.Sequential( 
+            nn.Linear(n_embd, 4 * n_embd), 
+            nn.ReLU(), 
+            nn.Linear(4 * n_embd, n_embd), 
+        )
+
+    def forward(self, x): 
+        return self.net(x)     
+
+
 class BigramLanguageModel(nn.Module):
 
     def __init__(self, vocab_size, n_embd, block_size):
@@ -36,6 +50,7 @@ class BigramLanguageModel(nn.Module):
         self.sa_heads = MultiHeadAttention(4, n_embd//4, n_embd, block_size)
         self.lm_head = nn.Linear(n_embd, vocab_size)
         self.block_size = block_size
+        self.ffwd = FeedForward(n_embd) 
 
     def forward(self, idx, targets=None):
         B, T = idx.shape
@@ -45,7 +60,10 @@ class BigramLanguageModel(nn.Module):
         )                                              # (T, n_embd)
         x = tok_emb + pos_emb                         # (B, T, n_embd)
         x = self.sa_heads(x)                           # (B, T, n_embd)
+        x = self.sa_heads(x)                          # (B, T, n_embd)
+        x = self.ffwd(x)                              # (B, T, n_embd)
         logits = self.lm_head(x)                      # (B, T, vocab_size)
+        
 
         if targets is None:
             loss = None
