@@ -3,12 +3,12 @@ from data import load_data, build_vocab, encode, get_splits, get_batch
 from model import BigramLanguageModel
 
 # hyperparameters
-batch_size = 4
-block_size = 8
-learning_rate = 1e-3
-max_steps = 10000
-eval_interval = 1000
-n_embd = 32
+batch_size = 32
+block_size = 64
+learning_rate = 3e-3
+max_steps = 5000
+eval_interval = 500
+n_embd = 128
 n_head = 4 
 n_layer = 4 
 
