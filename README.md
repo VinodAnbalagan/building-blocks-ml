@@ -26,7 +26,7 @@ A decoder-only transformer built up one component at a time — token and positi
 
 ## The arc
 
-The two projects connect directly: micrograd builds the autograd machinery that PyTorch gives you for free, and nanoGPT then leans on that same machinery (via PyTorch) to build something real. Backprop first, then a language model that depends on it — the full path from the chain rule to generated text.
+The two projects connect directly: micrograd builds the autograd machinery that PyTorch gives you for free, and nanoGPT then leans on that same machinery (via PyTorch) to build something real. Backprop first, then a language model that depends on it, the full path from the chain rule to generated text.
 
 ---
 
@@ -36,10 +36,6 @@ The two projects connect directly: micrograd builds the autograd machinery that 
 - PyTorch — used deliberately, understood rather than assumed
 
 ---
-
-## Writing
-
-Companion posts on [The Meta Gradient](https://substack.com/@themetagradient) explain the ideas behind the code in plain English.
 
 ---
 
