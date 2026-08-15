@@ -35,8 +35,4 @@ The two projects connect directly: micrograd builds the autograd machinery that 
 - Python 3.11+ (managed with uv)
 - PyTorch — used deliberately, understood rather than assumed
 
----
 
----
-
-*Built in public, to understand — not to impress.*
